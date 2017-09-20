@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			body {
+				background: black;
+			}
+			
+			canvas {
+				position: absolute;
+				left: 0;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				margin: auto;
+				background: white;
+			}
+		</style>
+	</head>
+
+	<body>
+		<canvas></canvas>
+	</body>
+	<script type="text/javascript">
+		window.onload = function() {
+			var oc = document.querySelector("canvas");
+			if(oc.getContext) {
+				var ctx = oc.getContext('2d');
+				var img = new Image();
+				img.setAttribute('crossOrigin', 'Anonymous');
+				
+				img.src = "../img/07.jpg";
+				img.onload = function() {
+					draw(this);
+				}
+
+				function draw(img) {
+					oc.width = img.width * 2;
+					oc.height = img.height;
+					ctx.drawImage(img, 0, 0);
+
+					//定义一个5*5的马赛克矩形
+					var size = 5;
+					//获取画布上整个旧图片的宽高
+					var oldImg = ctx.getImageData(0, 0, img.width, img.height);
+					//创建新图片 与旧图片的宽高一致
+					var newImg = ctx.createImageData(img.width, img.height);
+
+					/*
+					从马赛克矩形中随机挑出一个像素信息
+					*/
+
+					for(var i = 0; i < oldImg.width / size; i++) {
+						for(var j = 0; j < oldImg.height / size; j++) {
+							var color = getPoint(oldImg, Math.floor(i * (size-1) + Math.random() * size), Math.floor(j * (size-1) + Math.random() * size));
+							/*将整个马赛克矩形中的像素点信息都调出我们随机指定的那一个*/
+							for(var a = 0; a < size; a++) {
+								for(var b = 0; b < size; b++) {
+									setPoint(newImg, i * size + a, j * size + b, color);
+								}
+							}
+						}
+					}
+
+					//把新图片放到画布上
+					ctx.putImageData(newImg, img.width, 0);
+				}
+
+			}
+			//工具类
+			//获取单个像素点
+			function getPoint(imgData, x, y) {
+				var color = [];
+				var w = imgData.width;
+				var h = imgData.height;
+				var data = imgData.data;
+				color[0] = data[(y * w + x) * 4];
+				color[1] = data[(y * w + x) * 4 + 1];
+				color[2] = data[(y * w + x) * 4 + 2];
+				color[3] = data[(y * w + x) * 4 + 3];
+				return color;
+			}
+			//设置单个像素点
+			function setPoint(imgData, x, y, color) {
+				var w = imgData.width;
+				var h = imgData.height;
+				var data = imgData.data;
+				data[(y * w + x) * 4] = color[0];
+				data[(y * w + x) * 4 + 1] = color[1];
+				data[(y * w + x) * 4 + 2] = color[2];
+				data[(y * w + x) * 4 + 3] = color[3];
+
+			}
+
+		}
+	</script>
+
+</html>

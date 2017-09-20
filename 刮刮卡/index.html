@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta <meta name="viewport"  content="width=device-width,initial-scale=1.0,user-scalable=no" />
+		<title>刮刮卡</title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			html,body{
+				height: 100%;
+				overflow: hidden;
+			}
+			#wrap{
+				height: 100%;
+				overflow: hidden;
+			}
+			#wrap ul{
+				height: 100%;
+			}
+			#wrap ul>li{
+				height: 100%;
+				background: url(../img/b.png) no-repeat;
+				background-size: 100% 100%;
+			}
+			#wrap canvas{
+				position: absolute;
+				left: 0;
+				top: 0;
+				transition: 1s opacity;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<div id="wrap">
+			<canvas></canvas>
+			<ul>
+				<li></li>
+			</ul>
+		</div>
+	</body>
+	<script type="text/javascript">
+		window.onload=function(){
+			var oc=document.querySelector("canvas");
+			if(oc.getContext){
+				var ctx=oc.getContext('2d');
+				oc.width=document.documentElement.clientWidth;
+				oc.height=document.documentElement.clientHeight;
+				
+				var img=new Image();
+				img.src="../img/a.png";
+				img.onload=function(){
+					draw(this);
+				}
+				
+				function draw(img){
+					ctx.drawImage(img,0,0,oc.width,oc.height);
+					//手指按下事件
+					 oc.addEventListener("touchstart",function(event){
+					 	event=event||window.event;
+					 	//拿到一根手指
+					 	var touchC=event.changedTouches[0];
+					 	var x=touchC.clientX-oc.offsetLeft;
+					 	var y=touchC.clientY-oc.offsetTop;
+					 	
+					 	
+					 	ctx.lineWidth=40;
+					 	ctx.lineCap="round";
+					 	ctx.beginPath();
+					 	//只留下目标超过源的部分
+					 	ctx.globalCompositeOperation="destination-out";
+					 	ctx.moveTo(x,y);
+					 	ctx.lineTo(x+1,y+1);
+					 	ctx.stroke();
+					 	
+					 });
+					 oc.addEventListener("touchmove",function(event){
+					 	event=event||window.event;
+					 	//拿到一根手指
+					 	var touchC=event.changedTouches[0];
+					 	var x=touchC.clientX-oc.offsetLeft;
+					 	var y=touchC.clientY-oc.offsetTop;
+					 	ctx.lineTo(x,y);
+					 	ctx.stroke();
+					 	
+					 });
+					 
+					 oc.addEventListener("touchend",function(){
+					 	//拿到图片对象
+					 	var imgData=ctx.getImageData(0,0,oc.width,oc.height);
+					 	//获取图片上的所有像素
+					 	var allPx=imgData.width*imgData.height;
+					 	//定义一个计数器，计算图片透明的像素是否超过一半
+					 	var counter=0;
+					 	for(var i=0;i<allPx;i++){
+					 		//判断data数组的rgba的a  如果等于0则为透明
+					 		if(imgData.data[i*4+3]==0){
+					 			counter++;
+					 		}
+					 	}
+					 	//如果counter超过总像素的一半  则整个canvas透明
+					 	if(counter>allPx/2){
+					 		oc.style.opacity=0;
+					 	}
+					 });
+					 oc.addEventListener("transitionend",function(){
+					 	this.remove();
+					 })
+					 
+					 
+				}
+			}
+		}
+	</script>
+</html>
